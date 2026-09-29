@@ -7,9 +7,12 @@ const {
   getTopPosts,
 } = require("../controllers/postController");
 
+const upload = require("../middleware/upload");
+
 const router = express.Router();
 
-router.post("/", createPost);
+router.post("/", upload.single("image"), createPost);
+
 router.get("/", getPosts);
 
 router.get("/top", getTopPosts);

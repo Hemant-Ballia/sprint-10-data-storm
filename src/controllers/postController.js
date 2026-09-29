@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-
 const Post = require("../models/Post");
+const cloudinary = require("../config/cloudinary");
 
 const createPost = async (req, res) => {
   try {
@@ -20,10 +20,34 @@ const createPost = async (req, res) => {
       });
     }
 
+    let imageUrl = "";
+
+    if (req.file) {
+      const uploadResult = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: "sprint-11-posts",
+          },
+          (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+
+        uploadStream.end(req.file.buffer);
+      });
+
+      imageUrl = uploadResult.secure_url;
+    }
+
     const post = await Post.create({
       title,
       content,
       authorId,
+      imageUrl,
     });
 
     res.status(201).json({
